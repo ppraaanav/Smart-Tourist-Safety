@@ -1,0 +1,7 @@
+/* Leaflet needs its own stylesheet; include it once globally. */
+@import 'leaflet/dist/leaflet.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+

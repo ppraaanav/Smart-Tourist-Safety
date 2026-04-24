@@ -1,0 +1,23 @@
+{
+  "name": "smart-tourist-safety",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "client",
+    "server",
+    "ml-service"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\" \"npm run ml\"",
+    "server": "npm --prefix server run dev",
+    "client": "npm --prefix client run dev",
+    "ml": "npm --prefix ml-service run dev"
+  },
+  "devDependencies": {
+    "concurrently": "9.0.0"
+  },
+  "overrides": {
+    "follow-redirects": "1.15.9"
+  }
+}
+
