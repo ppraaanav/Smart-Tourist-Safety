@@ -1,6 +1,8 @@
-import { io } from 'socket.io-client';
+import { io } from "socket.io-client";
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || '';
+const SOCKET_URL =
+  import.meta.env.VITE_SOCKET_URL ||
+  "https://smart-tourist-safety-piu5.onrender.com";
 
 let socket = null;
 
@@ -9,22 +11,24 @@ export const connectSocket = (token) => {
 
   socket = io(SOCKET_URL, {
     auth: { token },
-    transports: ['websocket', 'polling'],
+    transports: ["websocket", "polling"],
     reconnection: true,
     reconnectionAttempts: 10,
-    reconnectionDelay: 1000
+    reconnectionDelay: 1000,
+    withCredentials: true,
+    autoConnect: true,
   });
 
-  socket.on('connect', () => {
-    console.log('Socket connected:', socket.id);
+  socket.on("connect", () => {
+    console.log("✅ Socket connected:", socket.id);
   });
 
-  socket.on('disconnect', (reason) => {
-    console.log('Socket disconnected:', reason);
+  socket.on("disconnect", (reason) => {
+    console.log("❌ Socket disconnected:", reason);
   });
 
-  socket.on('connect_error', (error) => {
-    console.error('Socket connection error:', error.message);
+  socket.on("connect_error", (error) => {
+    console.error("🚨 Socket connection error:", error.message);
   });
 
   return socket;
@@ -39,4 +43,8 @@ export const disconnectSocket = () => {
 
 export const getSocket = () => socket;
 
-export default { connectSocket, disconnectSocket, getSocket };
+export default {
+  connectSocket,
+  disconnectSocket,
+  getSocket,
+};

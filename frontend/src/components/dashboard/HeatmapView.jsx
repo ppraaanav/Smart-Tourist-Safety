@@ -2,7 +2,7 @@ import { GoogleMap, Marker, Circle } from "@react-google-maps/api";
 import { useEffect, useState } from "react";
 import io from "socket.io-client";
 
-const socket = io("http://localhost:5000", {
+const socket = io("https://smart-tourist-safety-piu5.onrender.com", {
   transports: ["websocket"],
 });
 
