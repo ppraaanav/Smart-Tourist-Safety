@@ -1,4 +1,4 @@
-import { GoogleMap, Marker, Circle } from "@react-google-maps/api";
+import { GoogleMap, Marker, Circle, useJsApiLoader } from "@react-google-maps/api";
 import { useEffect, useState } from "react";
 import io from "socket.io-client";
 
@@ -17,6 +17,9 @@ const GEOFENCE = {
 };
 
 const HeatmapView = ({ data = [] }) => {
+  const { isLoaded, loadError } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "AIzaSyBahdSYiv_xjChAwfQTqCEfetuwFMEGJwU",
+  });
   const [liveData, setLiveData] = useState([]);
 
   useEffect(() => {
@@ -36,6 +39,14 @@ const HeatmapView = ({ data = [] }) => {
     const dy = p.lng - GEOFENCE.center.lng;
     return Math.sqrt(dx * dx + dy * dy) * 111000 < GEOFENCE.radius;
   };
+
+  if (loadError) {
+    return <div className="glass-card-solid p-4">Map failed to load.</div>;
+  }
+
+  if (!isLoaded) {
+    return <div className="glass-card-solid p-4">Loading map...</div>;
+  }
 
   return (
     <div className="glass-card-solid overflow-hidden">

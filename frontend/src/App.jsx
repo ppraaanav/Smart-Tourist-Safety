@@ -1,4 +1,3 @@
-import { LoadScript } from "@react-google-maps/api";
 import { useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -19,7 +18,6 @@ import TouristsPage from './pages/TouristsPage';
 import GeofencesPage from './pages/GeofencesPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import AlertsPage from './pages/AlertsPage';
-import ProfilePage from './pages/ProfilePage';
 
 const libraries = ["places"]; // ✅ FIXED (no heatmap lib)
 
@@ -49,12 +47,8 @@ function App() {
   }, [initTheme, isAuthenticated, initSocket]);
 
   return (
-    <LoadScript
-      googleMapsApiKey="AIzaSyBahdSYiv_xjChAwfQTqCEfetuwFMEGJwU"
-      libraries={libraries}
-    >
-      <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
 
           <Route path="/" element={
             isAuthenticated ?
@@ -118,9 +112,8 @@ function App() {
 
           <Route path="*" element={<Navigate to="/" replace />} />
 
-        </Routes>
-      </AnimatePresence>
-    </LoadScript>
+      </Routes>
+    </AnimatePresence>
   );
 }
 

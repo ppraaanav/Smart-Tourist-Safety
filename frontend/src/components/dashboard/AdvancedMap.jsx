@@ -28,7 +28,7 @@ const getMarkerIcon = (severity) => {
 
 const AdvancedMap = ({ incidents = [] }) => {
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "AIzaSyBahdSYiv_xjChAwfQTqCEfetuwFMEGJwU",
   });
 
   const mapRef = useRef(null);

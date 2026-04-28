@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { GoogleMap, LoadScript, Marker, Polygon } from "@react-google-maps/api";
+import { GoogleMap, Marker, Polygon, useJsApiLoader } from "@react-google-maps/api";
 import { HiOutlineMap, HiOutlinePlusCircle } from 'react-icons/hi2';
 import { geofenceAPI } from '../services/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -14,6 +14,9 @@ const geofenceColors = {
 };
 
 const GeofencesPage = () => {
+  const { isLoaded, loadError } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "AIzaSyBahdSYiv_xjChAwfQTqCEfetuwFMEGJwU",
+  });
   const [geofences, setGeofences] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -133,7 +136,11 @@ const GeofencesPage = () => {
 
       {/* GOOGLE MAP */}
       <div className="glass-card-solid overflow-hidden" style={{ height: '500px' }}>
-        {/* <LoadScript googleMapsApiKey="AIzaSyBahdSYiv_xjChAwfQTqCEfetuwFMEGJwU"> */}
+        {loadError ? (
+          <div className="p-4">Map failed to load.</div>
+        ) : !isLoaded ? (
+          <div className="p-4">Loading map...</div>
+        ) : (
           <GoogleMap
             mapContainerStyle={{ width: "100%", height: "100%" }}
             center={{ lat: 28.6139, lng: 77.2090 }}
@@ -159,7 +166,7 @@ const GeofencesPage = () => {
 
             <Marker position={{ lat: 28.6139, lng: 77.2090 }} />
           </GoogleMap>
-        {/* </LoadScript> */}
+        )}
       </div>
 
       {/* LIST */}

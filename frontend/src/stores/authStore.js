@@ -13,7 +13,7 @@ const useAuthStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await authAPI.login(credentials);
-      const { user, token } = response.data;
+      const { user, token } = response.data || response;
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       connectSocket(token);
@@ -29,7 +29,7 @@ const useAuthStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await authAPI.register(data);
-      const { user, token } = response.data;
+      const { user, token } = response.data || response;
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       connectSocket(token);
