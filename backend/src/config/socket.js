@@ -7,7 +7,10 @@ let io;
 const initSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin: process.env.CORS_ORIGIN || '*',
+      origin: [
+        'http://localhost:5173',
+        'https://smart-tourist-safety-client.vercel.app'
+      ],
       methods: ['GET', 'POST'],
       credentials: true
     },
@@ -15,12 +18,13 @@ const initSocket = (server) => {
     pingInterval: 25000
   });
 
-  // Authentication middleware for Socket.IO
   io.use((socket, next) => {
-    const token = socket.handshake.auth.token;
+    const token = socket.handshake.auth?.token;
+
     if (!token) {
       return next(new Error('Authentication required'));
     }
+
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       socket.userId = decoded.id;
@@ -32,20 +36,34 @@ const initSocket = (server) => {
   });
 
   io.on('connection', (socket) => {
-    logger.info(`Socket connected: ${socket.id} | User: ${socket.userId} | Role: ${socket.userRole}`);
+    logger.info(
+      `Socket connected: ${socket.id} | User: ${socket.userId} | Role: ${socket.userRole}`
+    );
 
-    // Join role-based rooms
+    // Personal room
     socket.join(`user:${socket.userId}`);
+
+    // Role-based rooms
     if (socket.userRole === 'authority') {
       socket.join('authorities');
     }
+
     if (socket.userRole === 'tourist') {
       socket.join('tourists');
     }
 
-    // Tourist location update
+    // Manual room join
+    socket.on('join-room', ({ userId, role }) => {
+      socket.join(`user:${userId}`);
+
+      if (role === 'authority') socket.join('authorities');
+      if (role === 'tourist') socket.join('tourists');
+
+      logger.info(`${userId} joined ${role} room`);
+    });
+
+    // Tourist location updates
     socket.on('location:update', (data) => {
-      // Broadcast to authorities
       io.to('authorities').emit('tourist:location', {
         userId: socket.userId,
         ...data,
@@ -53,9 +71,10 @@ const initSocket = (server) => {
       });
     });
 
-    // SOS signal
+    // SOS alerts
     socket.on('sos:trigger', (data) => {
       logger.warn(`SOS triggered by user ${socket.userId}`);
+
       io.to('authorities').emit('sos:alert', {
         userId: socket.userId,
         ...data,
@@ -64,16 +83,23 @@ const initSocket = (server) => {
       });
     });
 
-    // Incident status update
+    // Incident updates
     socket.on('incident:update', (data) => {
       io.to('authorities').emit('incident:updated', data);
+
       if (data.touristId) {
         io.to(`user:${data.touristId}`).emit('incident:status', data);
       }
     });
 
-    socket.on('disconnect', () => {
-      logger.info(`Socket disconnected: ${socket.id}`);
+    // Direct alert to tourist
+    socket.on('send-alert', ({ touristId, alert }) => {
+      io.to(`user:${touristId}`).emit('new-alert', alert);
+      logger.info(`Alert sent to tourist ${touristId}`);
+    });
+
+    socket.on('disconnect', (reason) => {
+      logger.info(`Socket disconnected: ${socket.id} | Reason: ${reason}`);
     });
   });
 
@@ -81,7 +107,9 @@ const initSocket = (server) => {
 };
 
 const getIO = () => {
-  if (!io) throw new Error('Socket.IO not initialized');
+  if (!io) {
+    throw new Error('Socket.IO not initialized');
+  }
   return io;
 };
 

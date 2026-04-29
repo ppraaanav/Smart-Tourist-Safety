@@ -25,17 +25,43 @@ const server = http.createServer(app);
 const io = initSocket(server);
 app.set('io', io);
 
+// CORS Configuration
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://smart-tourist-safety-client.vercel.app'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
 // Security middleware
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use(cors({ origin: process.env.CORS_ORIGIN || '*', credentials: true }));
 app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
+app.use(
+  morgan('combined', {
+    stream: {
+      write: (msg) => logger.info(msg.trim())
+    }
+  })
+);
 
-// Health check
+// Health Check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString(), service: 'tourist-safety-backend' });
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    service: 'tourist-safety-backend'
+  });
 });
 
 // API Routes
@@ -47,29 +73,41 @@ app.use('/api/geofences', geofenceRoutes);
 app.use('/api/alerts', alertRoutes);
 app.use('/api/analytics', analyticsRoutes);
 
-// Global error handler
+// Global Error Handler
 app.use((err, req, res, next) => {
   logger.error(`${err.message} - ${err.stack}`);
+
   res.status(err.statusCode || 500).json({
     success: false,
     message: err.message || 'Internal Server Error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    ...(process.env.NODE_ENV === 'development' && {
+      stack: err.stack
+    })
   });
 });
 
-// 404 handler
+// 404 Handler
 app.use((req, res) => {
-  res.status(404).json({ success: false, message: 'Route not found' });
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  });
 });
 
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
-  await connectDB();
-  server.listen(PORT, () => {
-    logger.info(`Server running on port ${PORT}`);
-    logger.info(`Environment: ${process.env.NODE_ENV}`);
-  });
+  try {
+    await connectDB();
+
+    server.listen(PORT, () => {
+      logger.info(`Server running on port ${PORT}`);
+      logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    });
+  } catch (error) {
+    logger.error(`Server startup failed: ${error.message}`);
+    process.exit(1);
+  }
 };
 
 startServer();

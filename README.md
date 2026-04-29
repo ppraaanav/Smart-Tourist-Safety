@@ -140,7 +140,7 @@ npm run dev             # Start on port 5173
 docker-compose up --build
 ```
 - Frontend: http://localhost:5173
-- Backend: http://localhost:5000
+- Backend: https://smart-tourist-safety-piu5.onrender.com
 - AI Service: http://localhost:8000
 
 ---
@@ -149,7 +149,7 @@ docker-compose up --build
 
 | Service      | Command                          | URL                    |
 |-------------|----------------------------------|------------------------|
-| Backend     | `cd backend && npm run dev`      | http://localhost:5000   |
+| Backend     | `cd backend && npm run dev`      | https://smart-tourist-safety-piu5.onrender.com   |
 | AI Service  | `cd ai-service && uvicorn app.main:app --reload --port 8000` | http://localhost:8000 |
 | Frontend    | `cd frontend && npm run dev`     | http://localhost:5173   |
 | MongoDB     | `mongod`                         | mongodb://localhost:27017 |

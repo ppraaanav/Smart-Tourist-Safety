@@ -12,7 +12,7 @@ const api = axios.create({
   },
 });
 
-// Request interceptor - attach token
+// Request interceptor
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
 
@@ -23,7 +23,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Response interceptor - handle errors
+// Response interceptor
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
@@ -41,7 +41,7 @@ api.interceptors.response.use(
   }
 );
 
-// Auth
+// ==================== AUTH ====================
 export const authAPI = {
   register: (data) => api.post("/auth/register", data),
   login: (data) => api.post("/auth/login", data),
@@ -51,7 +51,7 @@ export const authAPI = {
     api.post("/auth/push-subscription", { subscription }),
 };
 
-// Location
+// ==================== LOCATION ====================
 export const locationAPI = {
   update: (data) => api.post("/locations/update", data),
   syncOffline: (locations) =>
@@ -62,7 +62,7 @@ export const locationAPI = {
     api.get("/locations/nearby", { params }),
 };
 
-// Incidents
+// ==================== INCIDENTS ====================
 export const incidentAPI = {
   create: (data) => api.post("/incidents", data),
   getAll: (params) => api.get("/incidents", { params }),
@@ -71,7 +71,7 @@ export const incidentAPI = {
   triggerSOS: (data) => api.post("/incidents/sos", data),
 };
 
-// Geofences
+// ==================== GEOFENCES ====================
 export const geofenceAPI = {
   create: (data) => api.post("/geofences", data),
   getAll: (params) => api.get("/geofences", { params }),
@@ -80,14 +80,17 @@ export const geofenceAPI = {
   delete: (id) => api.delete(`/geofences/${id}`),
 };
 
-// Alerts
+// ==================== ALERTS ====================
 export const alertAPI = {
   getAll: (params) => api.get("/alerts", { params }),
   markAsRead: (id) => api.put(`/alerts/${id}/read`),
   markAllAsRead: () => api.put("/alerts/read-all"),
+
+  // NEW: Send alert to tourist
+  send: (data) => api.post("/alerts/send", data),
 };
 
-// Tourists
+// ==================== TOURISTS ====================
 export const touristAPI = {
   getAll: (params) => api.get("/tourists", { params }),
   getById: (id) => api.get(`/tourists/${id}`),
@@ -95,7 +98,7 @@ export const touristAPI = {
   getByDTID: (dtid) => api.get(`/tourists/dtid/${dtid}`),
 };
 
-// Analytics
+// ==================== ANALYTICS ====================
 export const analyticsAPI = {
   getDashboard: () => api.get("/analytics/dashboard"),
   getTrends: (params) =>

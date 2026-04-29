@@ -3578,3 +3578,9 @@
 {"level":"debug","message":"AI service unavailable: connect ECONNREFUSED ::1:8000","service":"tourist-safety","timestamp":"2026-04-23 22:08:18"}
 {"level":"info","message":"::1 - - [23/Apr/2026:16:38:23 +0000] \"GET /api/alerts?limit=50 HTTP/1.1\" 304 - \"http://localhost:5173/tourist/alerts\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36\"","service":"tourist-safety","timestamp":"2026-04-23 22:08:23"}
 {"level":"info","message":"::1 - - [23/Apr/2026:16:38:23 +0000] \"GET /api/alerts?limit=50 HTTP/1.1\" 304 - \"http://localhost:5173/tourist/alerts\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36\"","service":"tourist-safety","timestamp":"2026-04-23 22:08:23"}
+{"level":"info","message":"MongoDB Connected: ac-ljofhue-shard-00-00.aneqwkk.mongodb.net","service":"tourist-safety","timestamp":"2026-04-29 03:53:40"}
+{"level":"info","message":"Server running on port 5000","service":"tourist-safety","timestamp":"2026-04-29 03:53:40"}
+{"level":"info","message":"Environment: development","service":"tourist-safety","timestamp":"2026-04-29 03:53:40"}
+{"level":"info","message":"MongoDB Connected: ac-ljofhue-shard-00-02.aneqwkk.mongodb.net","service":"tourist-safety","timestamp":"2026-04-29 04:05:47"}
+{"level":"info","message":"Server running on port 5000","service":"tourist-safety","timestamp":"2026-04-29 04:05:48"}
+{"level":"info","message":"Environment: development","service":"tourist-safety","timestamp":"2026-04-29 04:05:48"}
