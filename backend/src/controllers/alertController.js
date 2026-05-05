@@ -120,8 +120,13 @@ exports.sendAlert = async (req, res) => {
 
     // Real-time socket notification
     req.app.get('io')
-      .to(`user:${userId}`)
-      .emit('new-alert', alert);
+  .to(`user:${userId}`)
+  .emit('alert:geofence', {
+    title,
+    message,
+    type,
+    priority
+  });
 
     res.status(201).json({
       success: true,
