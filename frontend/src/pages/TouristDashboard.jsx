@@ -94,6 +94,13 @@ const TouristDashboard = () => {
     });
   });
 
+  useSocket('alert:new', (data) => {
+  toast.error(`${data.title}: ${data.message}`);
+
+  // 🔥 IMPORTANT: update UI instantly
+  window.location.reload(); // quick fix
+});
+
   useSocket('alert:anomaly', (data) => {
     toast(data.message, {
       duration: 6000,

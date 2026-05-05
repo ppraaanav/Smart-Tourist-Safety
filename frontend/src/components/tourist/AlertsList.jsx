@@ -7,6 +7,9 @@ import LoadingSpinner from '../common/LoadingSpinner';
 
 const AlertsList = () => {
   const [alerts, setAlerts] = useState([]);
+  useSocket('alert:new', (newAlert) => {
+  setAlerts((prev) => [newAlert, ...prev]);
+});
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
 
