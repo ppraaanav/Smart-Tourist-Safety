@@ -7,18 +7,20 @@ const SOCKET_URL =
 let socket = null;
 
 export const connectSocket = (token) => {
-  if (socket?.connected) return socket;
+  // ✅ prevent multiple connections
+  if (socket && socket.connected) return socket;
 
   socket = io(SOCKET_URL, {
-    auth: {
-      token,
-    },
-    transports: ["websocket", "polling"],
+    auth: { token },
+
+    // ✅ FIX: polling first for Render stability
+    transports: ["polling", "websocket"],
+
     withCredentials: true,
     reconnection: true,
     reconnectionAttempts: 10,
     reconnectionDelay: 1000,
-    autoConnect: true,
+    timeout: 20000,
   });
 
   socket.on("connect", () => {
@@ -26,20 +28,24 @@ export const connectSocket = (token) => {
 
     const user = JSON.parse(localStorage.getItem("user") || "{}");
 
+    // ✅ SAFE room join
     if (user?._id && user?.role) {
       socket.emit("join-room", {
         userId: user._id,
         role: user.role,
       });
 
-      console.log(
-        `🚀 Joined room: user:${user._id} (${user.role})`
-      );
+      console.log(`🚀 Joined room: user:${user._id} (${user.role})`);
     }
   });
 
   socket.on("disconnect", (reason) => {
     console.log("❌ Socket disconnected:", reason);
+
+    // ✅ auto reconnect fallback
+    if (reason === "io server disconnect") {
+      socket.connect();
+    }
   });
 
   socket.on("connect_error", (error) => {
