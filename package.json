@@ -8,11 +8,14 @@
     "ml-service"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run server\" \"npm run client\" \"npm run ml\"",
-    "server": "npm --prefix server run dev",
-    "client": "npm --prefix client run dev",
-    "ml": "npm --prefix ml-service run dev"
-  },
+  "dev": "concurrently \"npm run server\" \"npm run client\" \"npm run ml\"",
+  "server": "npm --prefix server run dev",
+  "client": "npm --prefix client run dev",
+  "ml": "npm --prefix ml-service run dev",
+
+  "build": "npm --prefix client run build",
+  "start": "npm --prefix server start"
+},
   "devDependencies": {
     "concurrently": "9.0.0"
   },
