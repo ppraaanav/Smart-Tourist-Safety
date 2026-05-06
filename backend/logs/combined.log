@@ -3584,3 +3584,6 @@
 {"level":"info","message":"MongoDB Connected: ac-ljofhue-shard-00-02.aneqwkk.mongodb.net","service":"tourist-safety","timestamp":"2026-04-29 04:05:47"}
 {"level":"info","message":"Server running on port 5000","service":"tourist-safety","timestamp":"2026-04-29 04:05:48"}
 {"level":"info","message":"Environment: development","service":"tourist-safety","timestamp":"2026-04-29 04:05:48"}
+{"level":"info","message":"MongoDB Connected: ac-ljofhue-shard-00-00.aneqwkk.mongodb.net","service":"tourist-safety","timestamp":"2026-05-06 23:19:54"}
+{"level":"info","message":"Server running on port 5000","service":"tourist-safety","timestamp":"2026-05-06 23:19:55"}
+{"level":"info","message":"Environment: development","service":"tourist-safety","timestamp":"2026-05-06 23:19:55"}

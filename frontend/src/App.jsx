@@ -11,19 +11,22 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
+
 import AuthorityDashboard from './pages/AuthorityDashboard';
 import TouristDashboard from './pages/TouristDashboard';
+
 import IncidentsPage from './pages/IncidentsPage';
 import TouristsPage from './pages/TouristsPage';
 import GeofencesPage from './pages/GeofencesPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import AlertsPage from './pages/AlertsPage';
 
-const libraries = ["places"]; // ✅ FIXED (no heatmap lib)
+import ProfilePage from './pages/ProfilePage';
 
 const DashboardLayout = ({ children }) => (
   <div className="flex h-screen overflow-hidden bg-[var(--bg-secondary)]">
     <Sidebar />
+
     <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pt-16 lg:pt-6">
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -39,78 +42,160 @@ const DashboardLayout = ({ children }) => (
 function App() {
   const { isAuthenticated, user, initSocket } = useAuthStore();
   const { initTheme } = useThemeStore();
+
   const location = useLocation();
 
   useEffect(() => {
     initTheme();
-    if (isAuthenticated) initSocket();
+
+    if (isAuthenticated) {
+      initSocket();
+    }
   }, [initTheme, isAuthenticated, initSocket]);
 
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
 
-          <Route path="/" element={
-            isAuthenticated ?
-              <Navigate to={user?.role === 'tourist' ? '/tourist' : '/dashboard'} replace /> :
+        {/* PUBLIC ROUTES */}
+
+        <Route
+          path="/"
+          element={
+            isAuthenticated ? (
+              <Navigate
+                to={user?.role === 'tourist' ? '/tourist' : '/dashboard'}
+                replace
+              />
+            ) : (
               <Landing />
-          } />
+            )
+          }
+        />
 
-          <Route path="/login" element={
-            isAuthenticated ?
-              <Navigate to={user?.role === 'tourist' ? '/tourist' : '/dashboard'} replace /> :
+        <Route
+          path="/login"
+          element={
+            isAuthenticated ? (
+              <Navigate
+                to={user?.role === 'tourist' ? '/tourist' : '/dashboard'}
+                replace
+              />
+            ) : (
               <Login />
-          } />
+            )
+          }
+        />
 
-          <Route path="/register" element={
-            isAuthenticated ?
-              <Navigate to={user?.role === 'tourist' ? '/tourist' : '/dashboard'} replace /> :
+        <Route
+          path="/register"
+          element={
+            isAuthenticated ? (
+              <Navigate
+                to={user?.role === 'tourist' ? '/tourist' : '/dashboard'}
+                replace
+              />
+            ) : (
               <Register />
-          } />
+            )
+          }
+        />
 
-          <Route path="/dashboard" element={
+        {/* AUTHORITY ROUTES */}
+
+        <Route
+          path="/dashboard"
+          element={
             <ProtectedRoute roles={['authority', 'admin']}>
-              <DashboardLayout><AuthorityDashboard /></DashboardLayout>
+              <DashboardLayout>
+                <AuthorityDashboard />
+              </DashboardLayout>
             </ProtectedRoute>
-          } />
+          }
+        />
 
-          <Route path="/analytics" element={
+        <Route
+          path="/analytics"
+          element={
             <ProtectedRoute roles={['authority', 'admin']}>
-              <DashboardLayout><AnalyticsPage /></DashboardLayout>
+              <DashboardLayout>
+                <AnalyticsPage />
+              </DashboardLayout>
             </ProtectedRoute>
-          } />
+          }
+        />
 
-          <Route path="/incidents" element={
+        <Route
+          path="/incidents"
+          element={
             <ProtectedRoute roles={['authority', 'admin']}>
-              <DashboardLayout><IncidentsPage /></DashboardLayout>
+              <DashboardLayout>
+                <IncidentsPage />
+              </DashboardLayout>
             </ProtectedRoute>
-          } />
+          }
+        />
 
-          <Route path="/tourists" element={
+        <Route
+          path="/tourists"
+          element={
             <ProtectedRoute roles={['authority', 'admin']}>
-              <DashboardLayout><TouristsPage /></DashboardLayout>
+              <DashboardLayout>
+                <TouristsPage />
+              </DashboardLayout>
             </ProtectedRoute>
-          } />
+          }
+        />
 
-          <Route path="/geofences" element={
+        <Route
+          path="/geofences"
+          element={
             <ProtectedRoute roles={['authority', 'admin']}>
-              <DashboardLayout><GeofencesPage /></DashboardLayout>
+              <DashboardLayout>
+                <GeofencesPage />
+              </DashboardLayout>
             </ProtectedRoute>
-          } />
+          }
+        />
 
-          <Route path="/tourist/alerts" element={
-            <ProtectedRoute roles={['authority', 'admin', 'tourist']}>
-              <DashboardLayout><AlertsPage /></DashboardLayout>
+        {/* TOURIST ROUTES */}
+
+        <Route
+          path="/tourist"
+          element={
+            <ProtectedRoute roles={['tourist']}>
+              <DashboardLayout>
+                <TouristDashboard />
+              </DashboardLayout>
             </ProtectedRoute>
-          } />
+          }
+        />
 
-          <Route path="/tourist" element={
-            <ProtectedRoute roles={['authority', 'admin','tourist']}>
-              <DashboardLayout><TouristDashboard /></DashboardLayout>
+        <Route
+          path="/tourist/alerts"
+          element={
+            <ProtectedRoute roles={['tourist']}>
+              <DashboardLayout>
+                <AlertsPage />
+              </DashboardLayout>
             </ProtectedRoute>
-          } />
+          }
+        />
 
-          <Route path="*" element={<Navigate to="/" replace />} />
+        <Route
+          path="/tourist/profile"
+          element={
+            <ProtectedRoute roles={['tourist']}>
+              <DashboardLayout>
+                <ProfilePage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* FALLBACK */}
+
+        <Route path="*" element={<Navigate to="/" replace />} />
 
       </Routes>
     </AnimatePresence>
