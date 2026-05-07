@@ -169,6 +169,17 @@ function App() {
           }
         />
 
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute roles={['authority', 'admin']}>
+              <DashboardLayout>
+                <ProfilePage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
         {/* TOURIST ROUTES */}
 
         <Route

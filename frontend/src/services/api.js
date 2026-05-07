@@ -66,6 +66,9 @@ export const authAPI = {
   updateProfile: (data) =>
     api.put("/auth/profile", data),
 
+  deleteAccount: () =>
+    api.delete("/auth/profile"),
+
   savePushSubscription: (subscription) =>
     api.post("/auth/push-subscription", {
       subscription,

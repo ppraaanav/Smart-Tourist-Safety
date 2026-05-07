@@ -1,5 +1,8 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Alert = require('../models/Alert');
+const Incident = require('../models/Incident');
+const LocationLog = require('../models/LocationLog');
 const logger = require('../config/logger');
 
 const generateToken = (user) => {
@@ -111,5 +114,43 @@ exports.savePushSubscription = async (req, res) => {
     res.json({ success: true, message: 'Push subscription saved' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to save subscription' });
+  }
+};
+
+exports.deleteAccount = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const userRole = req.user.role;
+    const userEmail = req.user.email;
+
+    if (userRole === 'tourist') {
+      await Promise.all([
+        LocationLog.deleteMany({ userId }),
+        Incident.deleteMany({ userId }),
+        Alert.deleteMany({ userId })
+      ]);
+    }
+
+    await Alert.updateMany(
+      { sentBy: userId },
+      { $unset: { sentBy: '' } }
+    );
+
+    await Incident.updateMany(
+      { assignedTo: userId },
+      { $unset: { assignedTo: '' } }
+    );
+
+    await User.findByIdAndDelete(userId);
+
+    logger.warn(`Account deleted: ${userEmail} (${userRole})`);
+
+    res.json({
+      success: true,
+      message: 'Account deleted successfully'
+    });
+  } catch (error) {
+    logger.error(`Delete account error: ${error.message}`);
+    res.status(500).json({ success: false, message: 'Failed to delete account' });
   }
 };

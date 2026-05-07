@@ -24,7 +24,8 @@ const Sidebar = () => {
     { to: '/tourists', icon: HiOutlineUsers, label: 'Tourists' },
     { to: '/geofences', icon: HiOutlineMap, label: 'Geofences' },
     { to: '/analytics', icon: HiOutlineChartBar, label: 'Analytics' },
-    { to: '/alerts', icon: HiOutlineBell, label: 'Alerts' }
+    { to: '/alerts', icon: HiOutlineBell, label: 'Alerts' },
+    { to: '/profile', icon: HiOutlineUserCircle, label: 'Profile' }
   ];
 
   const touristLinks = [

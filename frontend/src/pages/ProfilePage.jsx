@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { HiOutlineUserCircle } from 'react-icons/hi2';
+import { HiOutlineTrash, HiOutlineUserCircle } from 'react-icons/hi2';
+import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../stores/authStore';
 import { authAPI } from '../services/api';
 import toast from 'react-hot-toast';
 
 const ProfilePage = () => {
-  const { user, updateUser } = useAuthStore();
+  const navigate = useNavigate();
+  const { user, updateUser, logout } = useAuthStore();
   const [formData, setFormData] = useState({
     name: user?.name || '',
     phone: user?.phone || '',
@@ -14,6 +16,8 @@ const ProfilePage = () => {
     emergencyContact: user?.emergencyContact || { name: '', phone: '', relation: '' }
   });
   const [saving, setSaving] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -26,6 +30,25 @@ const ProfilePage = () => {
       toast.error('Failed to update profile');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirm !== 'DELETE') {
+      toast.error('Type DELETE to confirm account deletion');
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      await authAPI.deleteAccount();
+      toast.success('Account deleted');
+      logout();
+      navigate('/login', { replace: true });
+    } catch (err) {
+      toast.error(err.message || 'Failed to delete account');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -89,6 +112,43 @@ const ProfilePage = () => {
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
         </form>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="glass-card-solid p-6 border border-red-200 dark:border-red-900/60"
+      >
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/40 flex items-center justify-center flex-shrink-0">
+            <HiOutlineTrash className="w-5 h-5 text-red-500" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h2 className="font-semibold text-red-600 dark:text-red-400">Delete Account</h2>
+            <p className="text-sm text-[var(--text-secondary)] mt-1">
+              This permanently deletes your account. Tourist accounts also remove their saved location logs, incidents, and alerts.
+            </p>
+
+            <div className="mt-4 space-y-3">
+              <input
+                type="text"
+                value={deleteConfirm}
+                onChange={e => setDeleteConfirm(e.target.value)}
+                placeholder="Type DELETE to confirm"
+                className="input-field"
+              />
+              <button
+                type="button"
+                onClick={handleDeleteAccount}
+                disabled={deleting || deleteConfirm !== 'DELETE'}
+                className="btn-danger w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deleting ? 'Deleting...' : 'Delete My Account'}
+              </button>
+            </div>
+          </div>
+        </div>
       </motion.div>
     </div>
   );
