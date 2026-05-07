@@ -41,6 +41,10 @@ const geofenceSchema = new mongoose.Schema({
     type: Number,
     default: 500 // meters
   },
+  postalCode: {
+    type: String,
+    trim: true
+  },
   isActive: {
     type: Boolean,
     default: true

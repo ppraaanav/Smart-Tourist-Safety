@@ -9,8 +9,9 @@ import LoadingSpinner from '../common/LoadingSpinner';
 const AlertsList = () => {
   const [alerts, setAlerts] = useState([]);
   useSocket('alert:new', (newAlert) => {
-  setAlerts((prev) => [newAlert, ...prev]);
-});
+    setAlerts((prev) => [newAlert, ...prev]);
+    setUnreadCount((prev) => prev + 1);
+  });
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -45,6 +46,12 @@ const AlertsList = () => {
   const severityIcon = (sev) => {
     const icons = { critical: '🔴', danger: '🟠', warning: '🟡', info: '🔵' };
     return icons[sev] || '🔵';
+  };
+
+  const senderLabel = (alert) => {
+    if (!alert.sentBy) return null;
+    const role = alert.sentBy.role === 'admin' ? 'admin' : 'authority';
+    return `Sent by ${role}${alert.sentBy.name ? ` (${alert.sentBy.name})` : ''}`;
   };
 
   return (
@@ -90,7 +97,15 @@ const AlertsList = () => {
                     {alert.title}
                   </p>
                   <p className="text-xs text-[var(--text-secondary)] mt-1">{alert.message}</p>
-                  <p className="text-[10px] text-[var(--text-secondary)] mt-2">{timeAgo(alert.createdAt)}</p>
+                  <div className="flex flex-wrap gap-2 text-[10px] text-[var(--text-secondary)] mt-2">
+                    <span>{timeAgo(alert.createdAt)}</span>
+                    {senderLabel(alert) && <span>{senderLabel(alert)}</span>}
+                    {alert.incidentId?.status && (
+                      <span className="capitalize">
+                        Incident: {alert.incidentId.status.replace('_', ' ')}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 {!alert.isRead && (
                   <button onClick={() => markRead(alert._id)} className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">

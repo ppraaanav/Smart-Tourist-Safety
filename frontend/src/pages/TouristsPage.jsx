@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { HiOutlineUsers, HiOutlineMagnifyingGlass } from 'react-icons/hi2';
-import { touristAPI } from '../services/api';
+import { HiOutlineUsers, HiOutlineMagnifyingGlass, HiOutlineBell } from 'react-icons/hi2';
+import toast from 'react-hot-toast';
+import { alertAPI, touristAPI } from '../services/api';
 import { timeAgo } from '../utils/helpers';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
@@ -11,6 +12,12 @@ const TouristsPage = () => {
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(null);
   const [detail, setDetail] = useState(null);
+  const [alertForm, setAlertForm] = useState({
+    title: '',
+    message: '',
+    severity: 'warning'
+  });
+  const [sendingAlert, setSendingAlert] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -29,6 +36,32 @@ const TouristsPage = () => {
       setDetail(res.data);
       setSelected(id);
     } catch (err) { console.error(err); }
+  };
+
+  const sendManualAlert = async (e) => {
+    e.preventDefault();
+    if (!detail?.tourist?._id) return;
+
+    setSendingAlert(true);
+    try {
+      await alertAPI.sendAlert({
+        userId: detail.tourist._id,
+        touristId: detail.tourist._id,
+        title: alertForm.title,
+        message: alertForm.message,
+        type: 'websocket',
+        channel: 'web',
+        severity: alertForm.severity,
+        priority: alertForm.severity
+      });
+
+      toast.success('Alert sent to tourist');
+      setAlertForm({ title: '', message: '', severity: 'warning' });
+    } catch (err) {
+      toast.error(err.message || 'Failed to send alert');
+    } finally {
+      setSendingAlert(false);
+    }
   };
 
   if (loading) return <LoadingSpinner text="Loading tourists..." />;
@@ -120,6 +153,45 @@ const TouristsPage = () => {
                     <p className="text-xs text-[var(--text-secondary)]">{detail.tourist.emergencyContact.phone} ({detail.tourist.emergencyContact.relation})</p>
                   </div>
                 )}
+
+                <form onSubmit={sendManualAlert} className="p-3 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 mt-4 space-y-3">
+                  <div className="flex items-center gap-2 text-yellow-700 dark:text-yellow-300">
+                    <HiOutlineBell className="w-4 h-4" />
+                    <p className="text-xs font-medium">Send Manual Alert</p>
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Alert title"
+                    value={alertForm.title}
+                    onChange={e => setAlertForm(f => ({ ...f, title: e.target.value }))}
+                    className="input-field !py-2 text-xs"
+                  />
+                  <textarea
+                    required
+                    placeholder="Alert message"
+                    value={alertForm.message}
+                    onChange={e => setAlertForm(f => ({ ...f, message: e.target.value }))}
+                    className="input-field !py-2 text-xs min-h-20 resize-none"
+                  />
+                  <select
+                    value={alertForm.severity}
+                    onChange={e => setAlertForm(f => ({ ...f, severity: e.target.value }))}
+                    className="input-field !py-2 text-xs"
+                  >
+                    <option value="info">Info</option>
+                    <option value="warning">Warning</option>
+                    <option value="danger">Danger</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                  <button
+                    type="submit"
+                    disabled={sendingAlert}
+                    className="btn-primary w-full !py-2 text-xs"
+                  >
+                    {sendingAlert ? 'Sending...' : 'Send Alert'}
+                  </button>
+                </form>
 
                 {/* Recent incidents */}
                 <div className="mt-4">

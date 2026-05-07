@@ -10,6 +10,7 @@ exports.updateLocation = async (req, res) => {
     const { coordinates, accuracy, speed, heading, altitude, battery } = req.validatedBody || req.body;
     const userId = req.user._id;
     const dtid = req.user.dtid;
+    const previousCoordinates = req.user.lastKnownLocation?.coordinates;
 
     // Save location log
     const locationLog = await LocationLog.create({
@@ -42,7 +43,7 @@ exports.updateLocation = async (req, res) => {
     });
 
     // Check geofences asynchronously
-    checkGeofences(userId, dtid, coordinates, io).catch(err =>
+    checkGeofences(userId, dtid, previousCoordinates, coordinates, io).catch(err =>
       logger.error(`Geofence check error: ${err.message}`)
     );
 
@@ -86,10 +87,21 @@ exports.syncOfflineLocations = async (req, res) => {
 
     // Update last known location with most recent
     const latest = locations.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
+    const previousCoordinates = req.user.lastKnownLocation?.coordinates;
+
     await User.findByIdAndUpdate(req.user._id, {
       lastKnownLocation: { type: 'Point', coordinates: latest.coordinates },
       lastActive: new Date()
     });
+
+    const io = getIO();
+    const sortedLocations = [...locations].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    let lastCoordinates = previousCoordinates;
+
+    for (const loc of sortedLocations) {
+      await checkGeofences(req.user._id, req.user.dtid, lastCoordinates, loc.coordinates, io);
+      lastCoordinates = loc.coordinates;
+    }
 
     logger.info(`Synced ${locations.length} offline locations for ${req.user.dtid}`);
     res.json({ success: true, message: `Synced ${locations.length} locations` });

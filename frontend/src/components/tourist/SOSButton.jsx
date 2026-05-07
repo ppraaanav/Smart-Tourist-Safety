@@ -15,8 +15,10 @@ const SOSButton = () => {
     try {
       let coords = position?.coordinates;
       if (!coords) {
+        toast.loading('Getting your current location...', { id: 'sos-location' });
         const pos = await getCurrentPosition();
         coords = pos.coordinates;
+        toast.dismiss('sos-location');
       }
 
       await incidentAPI.triggerSOS({
@@ -24,10 +26,17 @@ const SOSButton = () => {
         description: 'SOS Emergency triggered by tourist'
       });
 
-      toast.success('SOS Alert Sent! Help is on the way.', { duration: 6000, icon: '🆘' });
+      toast.success('SOS Alert Sent! Help is on the way.', { duration: 6000 });
       setShowConfirm(false);
     } catch (error) {
-      toast.error('Failed to send SOS. Please try again.');
+      toast.dismiss('sos-location');
+      const message =
+        error?.code === 1
+          ? 'Location permission is required to send SOS.'
+          : error?.message?.toLowerCase?.().includes('geolocation')
+            ? 'Unable to get your location. Please enable location services and try again.'
+            : 'Failed to send SOS. Please try again.';
+      toast.error(message);
     } finally {
       setIsSending(false);
     }

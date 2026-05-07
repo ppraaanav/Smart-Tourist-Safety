@@ -11,9 +11,13 @@ const alertSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Incident'
   },
+  sentBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
   type: {
     type: String,
-    enum: ['push', 'sms', 'websocket', 'email'],
+    enum: ['push', 'sms', 'websocket', 'email', 'manual', 'sos', 'incident'],
     required: true
   },
   title: {

@@ -36,7 +36,7 @@ exports.createIncident = async (req, res) => {
     });
 
     // Send notifications to all authorities
-    const authorities = await User.find({ role: 'authority', isActive: true });
+    const authorities = await User.find({ role: { $in: ['authority', 'admin'] }, isActive: true });
     for (const auth of authorities) {
       sendNotification(auth, {
         title: `${data.severity.toUpperCase()} - ${data.type} Incident`,
@@ -151,6 +151,15 @@ exports.updateIncident = async (req, res) => {
       status: incident.status
     });
 
+    if (status) {
+      await sendNotification(await User.findById(incident.userId), {
+        title: `Incident ${incident.status.replace('_', ' ')}`,
+        message: `Your ${incident.type.replace('_', ' ')} incident is now ${incident.status.replace('_', ' ')}.`,
+        severity: incident.status === 'resolved' ? 'low' : 'medium',
+        incidentId: incident._id
+      }).catch(err => logger.error(`Tourist status notification error: ${err.message}`));
+    }
+
     res.json({ success: true, data: incident });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to update incident' });
@@ -193,7 +202,7 @@ exports.triggerSOS = async (req, res) => {
     });
 
     // Notify all authorities
-    const authorities = await User.find({ role: 'authority', isActive: true });
+    const authorities = await User.find({ role: { $in: ['authority', 'admin'] }, isActive: true });
     for (const auth of authorities) {
       sendNotification(auth, {
         title: 'CRITICAL SOS ALERT',

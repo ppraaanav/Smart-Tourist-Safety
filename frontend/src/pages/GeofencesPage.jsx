@@ -13,6 +13,32 @@ const geofenceColors = {
   warning: { color: '#eab308', fillColor: '#eab30880' }
 };
 
+const buildCirclePolygon = (center, radius, points = 48) => {
+  const earthRadius = 6378137;
+  const lat = center.lat * Math.PI / 180;
+  const lng = center.lng * Math.PI / 180;
+  const coordinates = [];
+
+  for (let i = 0; i <= points; i += 1) {
+    const bearing = (i / points) * 2 * Math.PI;
+    const angularDistance = radius / earthRadius;
+    const pointLat = Math.asin(
+      Math.sin(lat) * Math.cos(angularDistance) +
+      Math.cos(lat) * Math.sin(angularDistance) * Math.cos(bearing)
+    );
+    const pointLng = lng + Math.atan2(
+      Math.sin(bearing) * Math.sin(angularDistance) * Math.cos(lat),
+      Math.cos(angularDistance) - Math.sin(lat) * Math.sin(pointLat)
+    );
+
+    coordinates.push([pointLng * 180 / Math.PI, pointLat * 180 / Math.PI]);
+  }
+
+  return coordinates;
+};
+
+const toMapPath = (coordinates) => coordinates.map(([lng, lat]) => ({ lat, lng }));
+
 const GeofencesPage = () => {
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "AIzaSyBahdSYiv_xjChAwfQTqCEfetuwFMEGJwU",
@@ -23,12 +49,26 @@ const GeofencesPage = () => {
   const [formData, setFormData] = useState({
     name: '', description: '', type: 'danger', severity: 'high',
     alertMessage: 'You are entering a restricted zone!',
+    postalCode: '',
     center: { lat: 19.076, lng: 72.8777 },
     radius: 500
   });
 
   useEffect(() => {
     fetchGeofences();
+  }, []);
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const center = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setFormData(f => ({ ...f, center }));
+      },
+      (err) => console.error(err),
+      { enableHighAccuracy: true }
+    );
   }, []);
 
   const fetchGeofences = async () => {
@@ -43,15 +83,7 @@ const GeofencesPage = () => {
     e.preventDefault();
     try {
       const { center, radius, ...rest } = formData;
-      const offset = radius / 111000;
-
-      const polygon = [
-        [center.lng - offset, center.lat - offset],
-        [center.lng + offset, center.lat - offset],
-        [center.lng + offset, center.lat + offset],
-        [center.lng - offset, center.lat + offset],
-        [center.lng - offset, center.lat - offset]
-      ];
+      const polygon = buildCirclePolygon(center, radius);
 
       await geofenceAPI.create({
         ...rest,
@@ -67,6 +99,33 @@ const GeofencesPage = () => {
       toast.error('Failed to create geofence');
     }
   };
+
+  const lookupPostalCode = async () => {
+    if (!formData.postalCode.trim()) return;
+
+    try {
+      const res = await fetch(`https://api.postalpincode.in/pincode/${encodeURIComponent(formData.postalCode.trim())}`);
+      const data = await res.json();
+      const office = data?.[0]?.PostOffice?.find(item => item.Latitude && item.Longitude) || data?.[0]?.PostOffice?.[0];
+
+      if (!office?.Latitude || !office?.Longitude) {
+        toast.error('No map location found for this pincode');
+        return;
+      }
+
+      setFormData(f => ({
+        ...f,
+        center: { lat: Number(office.Latitude), lng: Number(office.Longitude) },
+        name: f.name || `${office.Name} Zone`,
+        description: f.description || `${office.District}, ${office.State}`
+      }));
+      toast.success('Pincode location loaded');
+    } catch (err) {
+      toast.error('Failed to lookup pincode');
+    }
+  };
+
+  const previewPath = toMapPath(buildCirclePolygon(formData.center, formData.radius || 500));
 
   if (loading) return <LoadingSpinner text="Loading geofences..." />;
 
@@ -123,6 +182,14 @@ const GeofencesPage = () => {
             <input type="number" placeholder="Radius (m)" value={formData.radius}
               onChange={e => setFormData(f => ({ ...f, radius: parseInt(e.target.value) }))}
               className="input-field" />
+            <div className="flex gap-2">
+              <input type="text" placeholder="Pincode" value={formData.postalCode}
+                onChange={e => setFormData(f => ({ ...f, postalCode: e.target.value }))}
+                className="input-field" />
+              <button type="button" onClick={lookupPostalCode} className="btn-ghost text-sm px-3">
+                Lookup
+              </button>
+            </div>
             <input type="text" placeholder="Alert Message" value={formData.alertMessage}
               onChange={e => setFormData(f => ({ ...f, alertMessage: e.target.value }))}
               className="input-field" />
@@ -137,14 +204,21 @@ const GeofencesPage = () => {
       {/* GOOGLE MAP */}
       <div className="glass-card-solid overflow-hidden" style={{ height: '500px' }}>
         {loadError ? (
-          <div className="p-4">Map failed to load.</div>
+          <div className="p-4">Map failed to load. Check your Google Maps API key and network connection.</div>
         ) : !isLoaded ? (
           <div className="p-4">Loading map...</div>
         ) : (
           <GoogleMap
             mapContainerStyle={{ width: "100%", height: "100%" }}
-            center={{ lat: 28.6139, lng: 77.2090 }}
-            zoom={10}
+            center={formData.center}
+            zoom={12}
+            onClick={(e) => {
+              if (!showForm) return;
+              setFormData(f => ({
+                ...f,
+                center: { lat: e.latLng.lat(), lng: e.latLng.lng() }
+              }));
+            }}
           >
             {geofences.map(fence => {
               const path = fence.geometry.coordinates[0].map(c => ({
@@ -164,7 +238,18 @@ const GeofencesPage = () => {
               );
             })}
 
-            <Marker position={{ lat: 28.6139, lng: 77.2090 }} />
+            {showForm && (
+              <>
+                <Polygon
+                  paths={previewPath}
+                  options={{
+                    fillColor: geofenceColors[formData.type]?.fillColor,
+                    strokeColor: geofenceColors[formData.type]?.color,
+                  }}
+                />
+                <Marker position={formData.center} />
+              </>
+            )}
           </GoogleMap>
         )}
       </div>
@@ -189,6 +274,9 @@ const GeofencesPage = () => {
                 {fence.severity}
               </span>
             </div>
+            {fence.postalCode && (
+              <p className="text-[10px] text-[var(--text-secondary)] mt-2">Pincode: {fence.postalCode}</p>
+            )}
           </motion.div>
         ))}
       </div>

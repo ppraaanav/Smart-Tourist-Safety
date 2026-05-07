@@ -13,7 +13,9 @@ function MapComponent() {
   });
 
   useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
+    if (!navigator.geolocation) return;
+
+    const watchId = navigator.geolocation.watchPosition(
       (pos) => {
         setLocation({
           lat: pos.coords.latitude,
@@ -23,10 +25,12 @@ function MapComponent() {
       (err) => console.error(err),
       { enableHighAccuracy: true }
     );
+
+    return () => navigator.geolocation.clearWatch(watchId);
   }, []);
 
   if (loadError) {
-    return <div className="glass-card-solid p-4">Map failed to load.</div>;
+    return <div className="glass-card-solid p-4">Map failed to load. Check your Google Maps API key and network connection.</div>;
   }
 
   if (!isLoaded) {

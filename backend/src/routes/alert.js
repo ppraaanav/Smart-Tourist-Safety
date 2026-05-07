@@ -1,20 +1,24 @@
 const router = require('express').Router();
 const {
   getAlerts,
+  getSentAlerts,
   markAsRead,
   markAllAsRead,
   sendAlert
 } = require('../controllers/alertController');
 
-const { protect } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 
 router.use(protect);
 
 // Get all alerts
 router.get('/', getAlerts);
 
+// Get alerts sent to tourists
+router.get('/sent', authorize('authority', 'admin'), getSentAlerts);
+
 // Send new alert
-router.post('/send', sendAlert);
+router.post('/send', authorize('authority', 'admin'), sendAlert);
 
 // Mark single alert as read
 router.put('/:id/read', markAsRead);

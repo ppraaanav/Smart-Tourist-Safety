@@ -1,8 +1,14 @@
 import { io } from "socket.io-client";
 
+const isLocalHost =
+  typeof window !== "undefined" &&
+  ["localhost", "127.0.0.1"].includes(window.location.hostname);
+
 const SOCKET_URL =
   import.meta.env.VITE_SOCKET_URL ||
-  "https://smart-tourist-safety-piu5.onrender.com";
+  (isLocalHost
+    ? "http://localhost:5000"
+    : "https://smart-tourist-safety-piu5.onrender.com");
 
 let socket = null;
 

@@ -160,6 +160,19 @@ const IncidentPanel = ({ incidents, onUpdate }) => {
                   <span className="text-[var(--text-secondary)]">Description</span>
                   <p className="mt-1">{selectedIncident.description}</p>
                 </div>
+                {selectedIncident.userId && (
+                  <div className="p-3 rounded-xl bg-gray-50 dark:bg-slate-800">
+                    <span className="text-[var(--text-secondary)]">Tourist</span>
+                    <p className="mt-1 font-medium">{selectedIncident.userId.name || 'Unknown tourist'}</p>
+                    <p className="text-xs text-[var(--text-secondary)]">
+                      {selectedIncident.userId.dtid || selectedIncident.dtid}
+                      {selectedIncident.userId.phone ? ` · ${selectedIncident.userId.phone}` : ''}
+                    </p>
+                    {selectedIncident.userId.email && (
+                      <p className="text-xs text-[var(--text-secondary)]">{selectedIncident.userId.email}</p>
+                    )}
+                  </div>
+                )}
                 <div>
                   <span className="text-[var(--text-secondary)]">Location</span>
                   <p className="mt-1 font-mono text-xs">

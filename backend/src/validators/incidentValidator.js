@@ -41,6 +41,7 @@ const geofenceSchema = z.object({
     coordinates: z.array(z.number()).length(2)
   }).optional(),
   radius: z.number().optional(),
+  postalCode: z.string().optional(),
   alertMessage: z.string().optional(),
   severity: z.enum(['low', 'medium', 'high', 'critical']).default('high')
 });

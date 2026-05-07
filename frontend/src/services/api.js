@@ -1,8 +1,14 @@
 import axios from "axios";
 
+const isLocalHost =
+  typeof window !== "undefined" &&
+  ["localhost", "127.0.0.1"].includes(window.location.hostname);
+
 const API_BASE =
   import.meta.env.VITE_API_BASE_URL ||
-  "https://smart-tourist-safety-piu5.onrender.com/api";
+  (isLocalHost
+    ? "http://localhost:5000/api"
+    : "https://smart-tourist-safety-piu5.onrender.com/api");
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -70,6 +76,9 @@ export const authAPI = {
 export const alertAPI = {
   getAll: (params) =>
     api.get("/alerts", { params }),
+
+  getSent: (params) =>
+    api.get("/alerts/sent", { params }),
 
   markAsRead: (id) =>
     api.put(`/alerts/${id}/read`),

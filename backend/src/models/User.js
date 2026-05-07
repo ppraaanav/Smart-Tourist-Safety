@@ -83,7 +83,6 @@ const userSchema = new mongoose.Schema({
 
 // Index for geospatial queries
 userSchema.index({ lastKnownLocation: '2dsphere' });
-userSchema.index({ dtid: 1 });
 userSchema.index({ role: 1 });
 
 // Hash password before saving

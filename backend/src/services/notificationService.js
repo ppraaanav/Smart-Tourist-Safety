@@ -2,6 +2,7 @@ const webpush = require('web-push');
 const Alert = require('../models/Alert');
 const logger = require('../config/logger');
 const { sendSMS } = require('./smsService');
+const { getIO } = require('../config/socket');
 
 // Configure web-push VAPID keys
 if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
@@ -28,6 +29,12 @@ const sendNotification = async (user, { title, message, severity, incidentId }) 
       channel: 'all',
       deliveredAt: new Date()
     });
+
+    try {
+      getIO().to(`user:${user._id}`).emit('alert:new', alert);
+    } catch (socketError) {
+      logger.warn(`Realtime alert emit skipped: ${socketError.message}`);
+    }
 
     // 2. Web Push Notification
     if (user.pushSubscription) {

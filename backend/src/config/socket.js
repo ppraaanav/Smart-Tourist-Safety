@@ -44,7 +44,7 @@ const initSocket = (server) => {
     socket.join(`user:${socket.userId}`);
 
     // Role-based rooms
-    if (socket.userRole === 'authority') {
+    if (socket.userRole === 'authority' || socket.userRole === 'admin') {
       socket.join('authorities');
     }
 
@@ -56,7 +56,7 @@ const initSocket = (server) => {
     socket.on('join-room', ({ userId, role }) => {
       socket.join(`user:${userId}`);
 
-      if (role === 'authority') socket.join('authorities');
+      if (role === 'authority' || role === 'admin') socket.join('authorities');
       if (role === 'tourist') socket.join('tourists');
 
       logger.info(`${userId} joined ${role} room`);
@@ -94,7 +94,7 @@ const initSocket = (server) => {
 
     // Direct alert to tourist
     socket.on('send-alert', ({ touristId, alert }) => {
-      io.to(`user:${touristId}`).emit('new-alert', alert);
+      io.to(`user:${touristId}`).emit('alert:new', alert);
       logger.info(`Alert sent to tourist ${touristId}`);
     });
 

@@ -158,6 +158,17 @@ function App() {
           }
         />
 
+        <Route
+          path="/alerts"
+          element={
+            <ProtectedRoute roles={['authority', 'admin']}>
+              <DashboardLayout>
+                <AlertsPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
         {/* TOURIST ROUTES */}
 
         <Route

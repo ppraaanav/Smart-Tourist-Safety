@@ -3587,3 +3587,15 @@
 {"level":"info","message":"MongoDB Connected: ac-ljofhue-shard-00-00.aneqwkk.mongodb.net","service":"tourist-safety","timestamp":"2026-05-06 23:19:54"}
 {"level":"info","message":"Server running on port 5000","service":"tourist-safety","timestamp":"2026-05-06 23:19:55"}
 {"level":"info","message":"Environment: development","service":"tourist-safety","timestamp":"2026-05-06 23:19:55"}
+{"level":"info","message":"MongoDB Connected: ac-ljofhue-shard-00-01.aneqwkk.mongodb.net","service":"tourist-safety","timestamp":"2026-05-07 04:33:09"}
+{"level":"info","message":"Server running on port 5000","service":"tourist-safety","timestamp":"2026-05-07 04:33:10"}
+{"level":"info","message":"Environment: development","service":"tourist-safety","timestamp":"2026-05-07 04:33:10"}
+{"level":"info","message":"MongoDB Connected: ac-ljofhue-shard-00-02.aneqwkk.mongodb.net","service":"tourist-safety","timestamp":"2026-05-07 04:54:32"}
+{"level":"info","message":"Server running on port 5000","service":"tourist-safety","timestamp":"2026-05-07 04:54:32"}
+{"level":"info","message":"Environment: development","service":"tourist-safety","timestamp":"2026-05-07 04:54:32"}
+{"level":"info","message":"MongoDB Connected: ac-ljofhue-shard-00-00.aneqwkk.mongodb.net","service":"tourist-safety","timestamp":"2026-05-07 20:38:20"}
+{"level":"info","message":"Server running on port 5000","service":"tourist-safety","timestamp":"2026-05-07 20:38:21"}
+{"level":"info","message":"Environment: development","service":"tourist-safety","timestamp":"2026-05-07 20:38:21"}
+{"level":"info","message":"MongoDB Connected: ac-ljofhue-shard-00-00.aneqwkk.mongodb.net","service":"tourist-safety","timestamp":"2026-05-07 20:48:49"}
+{"level":"info","message":"Server running on port 5000","service":"tourist-safety","timestamp":"2026-05-07 20:48:50"}
+{"level":"info","message":"Environment: development","service":"tourist-safety","timestamp":"2026-05-07 20:48:50"}
